@@ -207,7 +207,7 @@ export async function requestMagicLink(email: string): Promise<MagicLinkResponse
 }
 
 export async function verifyMagicLink(email: string, code: string): Promise<MagicLoginResponse> {
-  const response = await magicLinkApi.post('/auth/magic-login', { email, code, password: '' });
+  const response = await magicLinkApi.post('/auth/magic-login', { email, code });
   return response.data;
 }
 
