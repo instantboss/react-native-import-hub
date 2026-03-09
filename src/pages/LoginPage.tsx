@@ -23,7 +23,8 @@ export default function LoginPage() {
     setError('');
     try {
       const res = await requestMagicLink(email.trim().toLowerCase());
-      setMessage(res.message || 'Check your email for a login code.');
+      const msg = typeof res.message === 'string' ? res.message : 'Check your email for a login code.';
+      setMessage(msg);
       setStep('code');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to send magic link. Please try again.');
