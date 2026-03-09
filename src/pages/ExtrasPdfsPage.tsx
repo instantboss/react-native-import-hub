@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchExtraPdfs, type ExtraPdf } from '@/lib/api';
 import { FileText, ExternalLink, Download } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function ExtrasPdfsPage() {
@@ -20,8 +21,8 @@ export default function ExtrasPdfsPage() {
   if (!items.length) return <EmptyState icon={<FileText size={40} />} message="No extra PDFs available yet." />;
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Extra PDFs</h2>
+    <div className="py-4">
+      <PageHeader title="Extra PDFs" />
       <div className="space-y-3">
         {items.map((item) => {
           const pdfUrl = item.file?.url || item.link || '';

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchGroups, resolveImageUrl, type ContentItem } from '@/lib/api';
-import { Users, Image, ExternalLink } from 'lucide-react';
+import { fetchGroups, type ContentItem } from '@/lib/api';
+import { Users, ExternalLink } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function GroupsPage() {
@@ -17,38 +18,38 @@ export default function GroupsPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorState message={error} />;
-  if (!groups.length) return <EmptyState icon={<Users size={40} />} message="No groups available yet." />;
+  if (!groups.length) return <EmptyState icon={<Users size={40} />} message="No groups available" />;
+
+  const handlePress = (url: string) => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Groups</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {groups.map((group) => {
-          const imgUrl = resolveImageUrl(group.image) || group.image_url || '';
-          return (
-            <a
-              key={group.id}
-              href={group.link || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-xl overflow-hidden border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow block"
-            >
-              <div className="aspect-video bg-[var(--color-bg-secondary)] overflow-hidden">
-                {imgUrl ? (
-                  <img src={imgUrl} alt={group.name || ''} className="w-full h-full object-cover" loading="lazy" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Image size={32} className="text-[var(--color-text-muted)]" />
-                  </div>
-                )}
+    <div className="py-4">
+      <PageHeader title="Groups" subtitle="Connect with the Small Shop Social community" />
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {groups.map((group) => (
+          <button
+            key={group.id}
+            onClick={() => handlePress(group.link || group.url || '')}
+            className="flex flex-col items-center p-4 rounded-xl border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow"
+          >
+            <div className="w-20 h-20 rounded-full bg-[var(--color-brand-pink-light)] flex items-center justify-center mb-3">
+              <Users size={40} className="text-[var(--color-brand-pink)]" />
+            </div>
+            <p className="text-sm font-semibold text-[var(--color-text-primary)] text-center leading-tight mb-2">
+              {group.name || group.title || 'Group'}
+            </p>
+            {(group.link || group.url) && (
+              <div className="flex items-center gap-1">
+                <ExternalLink size={14} className="text-[var(--color-brand-pink)]" />
+                <span className="text-xs text-[var(--color-text-secondary)]">Open Group</span>
               </div>
-              <div className="p-3 flex items-center justify-between gap-2">
-                <p className="font-medium text-sm truncate">{group.name || group.title || 'Group'}</p>
-                {group.link && <ExternalLink size={14} className="shrink-0 text-[var(--color-brand-pink)]" />}
-              </div>
-            </a>
-          );
-        })}
+            )}
+          </button>
+        ))}
       </div>
     </div>
   );

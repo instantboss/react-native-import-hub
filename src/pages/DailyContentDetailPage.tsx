@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Copy, Check, Sun, Cloud, Moon, Sparkles, ListChecks } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Copy, Check } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { fetchDailyContent31, resolveImageUrl, type DailyContent } from '@/lib/api';
 import PageHeader from '@/components/PageHeader';
@@ -11,13 +11,41 @@ function formatDateDisplay(dateStr: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* ignore */ }
+  }, [text]);
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center justify-center gap-1.5 w-full px-3.5 py-2.5 rounded-[20px] bg-[var(--color-brand-pink-light)] text-[var(--color-brand-pink)] text-[13px] font-semibold hover:opacity-80 transition mt-2.5"
+    >
+      {copied ? <Check size={16} /> : <Copy size={16} />}
+      {copied ? 'Copied!' : label}
+    </button>
+  );
+}
+
+function SectionHeading({ children }: { children: string }) {
+  return (
+    <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-2">
+      {children}
+    </h3>
+  );
+}
+
 export default function DailyContentDetailPage() {
-  useUser(); // ensure authenticated
+  useUser();
   const { date } = useParams<{ date: string }>();
   const [content, setContent] = useState<DailyContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [copiedField, setCopiedField] = useState('');
 
   useEffect(() => {
     if (!date) return;
@@ -30,16 +58,6 @@ export default function DailyContentDetailPage() {
       .catch(() => setError('Failed to load content.'))
       .finally(() => setLoading(false));
   }, [date]);
-
-  const copyToClipboard = useCallback(async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(''), 2000);
-    } catch {
-      // fallback
-    }
-  }, []);
 
   if (loading) {
     return (
@@ -57,129 +75,143 @@ export default function DailyContentDetailPage() {
   if (error || !content) {
     return (
       <div className="py-4">
-        <Link to="/daily-content" className="inline-flex items-center gap-1 text-sm text-[var(--color-brand-pink)] hover:underline mb-4">
-          <ArrowLeft size={16} /> Back to Calendar
-        </Link>
+        <PageHeader title="Daily Content" />
         <div className="text-center py-12 text-[var(--color-text-muted)]">{error || 'Content not found.'}</div>
       </div>
     );
   }
 
-  const images = [content.image_1, content.image_2, content.image_3].filter(Boolean);
+  // Get images - try engagement_images first, then image_1/2/3
+  const getImages = (): string[] => {
+    if (content.engagement_images && content.engagement_images.length > 0) {
+      return content.engagement_images.map((img) => {
+        if (typeof img === 'string') return img;
+        return resolveImageUrl(img);
+      }).filter(Boolean) as string[];
+    }
+    const imgs: string[] = [];
+    if (content.image_1?.url) imgs.push(resolveImageUrl(content.image_1));
+    if (content.image_2?.url) imgs.push(resolveImageUrl(content.image_2));
+    if (content.image_3?.url) imgs.push(resolveImageUrl(content.image_3));
+    return imgs.filter(Boolean);
+  };
 
-  const posts = [
-    { label: 'Morning', icon: Sun, text: content.morning_post, places: content.morning_places_text, color: '#F59E0B' },
-    { label: 'Afternoon', icon: Cloud, text: content.afternoon_post, places: content.afternoon_places_text, color: '#3B82F6' },
-    { label: 'Evening', icon: Moon, text: content.evening_post, places: content.evening_places_text, color: '#8B5CF6' },
-  ];
+  const images = getImages();
 
   return (
     <div className="py-4">
-      <Link to="/daily-content" className="inline-flex items-center gap-1 text-sm text-[var(--color-brand-pink)] hover:underline mb-4">
-        <ArrowLeft size={16} /> Back to Calendar
-      </Link>
+      {/* Title Section - matches RN */}
+      <div className="text-center mb-4">
+        <h2 className="text-xl font-bold text-[var(--color-text-primary)]">Daily Content</h2>
+        {date && (
+          <p className="text-sm text-[var(--color-text-secondary)] mt-1">{formatDateDisplay(date)}</p>
+        )}
+      </div>
 
-      <PageHeader title={formatDateDisplay(date || '')} />
-
-      {/* Holiday */}
+      {/* Holiday banner */}
       {content.holiday && (
-        <div className="mb-5 flex items-center gap-2 p-3 rounded-xl bg-[var(--color-brand-pink-light)] border border-[var(--color-card-border)]">
-          <Sparkles size={18} className="text-[var(--color-brand-pink)] shrink-0" />
-          <span className="text-sm font-medium text-[var(--color-text-primary)]">{content.holiday}</span>
+        <div className="mb-5 py-2.5 px-3.5 rounded-[10px] bg-[var(--color-brand-pink-light)]">
+          <p className="text-[13px] font-semibold uppercase text-[var(--color-text-secondary)] tracking-wide text-center mb-1">
+            Today's Holiday
+          </p>
+          <p className="text-[17px] font-medium text-[var(--color-text-primary)] text-center tracking-tight">
+            {content.holiday}
+          </p>
         </div>
       )}
 
-      {/* Posts */}
-      <div className="space-y-4 mb-6">
-        {posts.map(({ label, icon: Icon, text, places, color }) => {
-          if (!text) return null;
-          return (
-            <div key={label} className="p-4 rounded-xl border border-[var(--color-border-light)] bg-white">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
-                  <Icon size={14} style={{ color }} />
-                </div>
-                <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">{label}</h3>
-              </div>
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">{text}</p>
-              {places && (
-                <p className="mt-2 text-xs text-[var(--color-text-muted)] italic">{places}</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Images - horizontal scroll, edge-to-edge */}
+      {images.length > 0 && (
+        <div className="mb-6 -mx-4">
+          <div className="px-4 mb-2">
+            <SectionHeading>Images</SectionHeading>
+          </div>
+          <div className="flex gap-3 overflow-x-auto px-4 pb-2">
+            {images.map((url, i) => (
+              <img
+                key={i}
+                src={url}
+                alt={`Image ${i + 1}`}
+                className="w-[60%] sm:w-[calc((100%-24px)/3)] shrink-0 rounded-xl object-cover aspect-square"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Hashtags */}
       {content.hashtags && (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Hashtags</h3>
-            <button
-              onClick={() => copyToClipboard(content.hashtags!, 'hashtags')}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-[var(--color-brand-pink)] hover:bg-[var(--color-brand-pink-light)] transition"
-            >
-              {copiedField === 'hashtags' ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
-            </button>
+        <div className="mb-6">
+          <SectionHeading>Hashtags</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px] break-words">{content.hashtags}</p>
           </div>
-          <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed bg-[var(--color-bg-secondary)] rounded-lg p-3 break-words">
-            {content.hashtags}
-          </p>
+          <CopyButton text={content.hashtags} label="Copy hashtags" />
         </div>
       )}
 
       {/* Caption */}
       {content.caption && (
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Caption</h3>
-            <button
-              onClick={() => copyToClipboard(content.caption!, 'caption')}
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs text-[var(--color-brand-pink)] hover:bg-[var(--color-brand-pink-light)] transition"
-            >
-              {copiedField === 'caption' ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
-            </button>
+        <div className="mb-6">
+          <SectionHeading>Caption</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px] whitespace-pre-line">{content.caption}</p>
           </div>
-          <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed bg-[var(--color-bg-secondary)] rounded-lg p-3 whitespace-pre-line">
-            {content.caption}
-          </p>
+          <CopyButton text={content.caption} label="Copy caption" />
+        </div>
+      )}
+
+      {/* Morning Post */}
+      {content.morning_post && (
+        <div className="mb-6">
+          <SectionHeading>Morning Post</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px]">{content.morning_post}</p>
+            {content.morning_places_text && (
+              <p className="text-[13px] text-[var(--color-brand-pink)] font-medium mt-2">{content.morning_places_text}</p>
+            )}
+          </div>
+          <CopyButton text={content.morning_post} label="Copy morning post" />
+        </div>
+      )}
+
+      {/* Afternoon Post */}
+      {content.afternoon_post && (
+        <div className="mb-6">
+          <SectionHeading>Afternoon Post</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px]">{content.afternoon_post}</p>
+            {content.afternoon_places_text && (
+              <p className="text-[13px] text-[var(--color-brand-pink)] font-medium mt-2">{content.afternoon_places_text}</p>
+            )}
+          </div>
+          <CopyButton text={content.afternoon_post} label="Copy afternoon post" />
+        </div>
+      )}
+
+      {/* Evening Post */}
+      {content.evening_post && (
+        <div className="mb-6">
+          <SectionHeading>Evening Post</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px]">{content.evening_post}</p>
+            {content.evening_places_text && (
+              <p className="text-[13px] text-[var(--color-brand-pink)] font-medium mt-2">{content.evening_places_text}</p>
+            )}
+          </div>
+          <CopyButton text={content.evening_post} label="Copy evening post" />
         </div>
       )}
 
       {/* Extra Tasks */}
       {content.extra_tasks && (
-        <div className="mb-5">
-          <div className="flex items-center gap-2 mb-2">
-            <ListChecks size={14} className="text-[var(--color-text-muted)]" />
-            <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide">Extra Tasks</h3>
-          </div>
-          <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed bg-[var(--color-bg-secondary)] rounded-lg p-3 whitespace-pre-line">
-            {content.extra_tasks}
-          </p>
-        </div>
-      )}
-
-      {/* Engagement Images */}
-      {images.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">Engagement Images</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {images.map((img, i) => {
-              const url = resolveImageUrl(img as any);
-              if (!url) return null;
-              return (
-                <a
-                  key={i}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="aspect-square rounded-xl overflow-hidden border border-[var(--color-border-light)] hover:shadow-md transition-shadow"
-                >
-                  <img src={url} alt={`Engagement ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                </a>
-              );
-            })}
+          <SectionHeading>Extra Tasks</SectionHeading>
+          <div className="bg-[var(--color-bg-secondary)] p-3.5 rounded-xl">
+            <p className="text-sm text-[var(--color-text-primary)] leading-[22px] whitespace-pre-line">{content.extra_tasks}</p>
           </div>
+          <CopyButton text={content.extra_tasks} label="Copy extra tasks" />
         </div>
       )}
     </div>

@@ -17,6 +17,12 @@ import LessonsPage from './pages/LessonsPage'
 import LessonDetailPage from './pages/LessonDetailPage'
 import MentorsPage from './pages/MentorsPage'
 import MentorDetailPage from './pages/MentorDetailPage'
+import MentorListPage from './pages/MentorListPage'
+import MentorAskPage from './pages/MentorAskPage'
+import MentorPodcastsPage from './pages/MentorPodcastsPage'
+import MentorToolboxPage from './pages/MentorToolboxPage'
+import MentorExtrasPage from './pages/MentorExtrasPage'
+import MentorLiveQAPage from './pages/MentorLiveQAPage'
 import NewsPage from './pages/NewsPage'
 import ExtrasPage from './pages/ExtrasPage'
 import ExtrasGraphicsPage from './pages/ExtrasGraphicsPage'
@@ -67,6 +73,12 @@ export default function App() {
                 <Route path="/lessons" element={<LessonsPage />} />
                 <Route path="/lessons/:id" element={<LessonDetailPage />} />
                 <Route path="/mentors" element={<MentorsPage />} />
+                <Route path="/mentors/list" element={<MentorListPage />} />
+                <Route path="/mentors/ask" element={<MentorAskPage />} />
+                <Route path="/mentors/podcasts" element={<MentorPodcastsPage />} />
+                <Route path="/mentors/toolbox" element={<MentorToolboxPage />} />
+                <Route path="/mentors/extras" element={<MentorExtrasPage />} />
+                <Route path="/mentors/live-qa" element={<MentorLiveQAPage />} />
                 <Route path="/mentors/:id" element={<MentorDetailPage />} />
                 <Route path="/news" element={<NewsPage />} />
                 <Route path="/extras" element={<ExtrasPage />} />

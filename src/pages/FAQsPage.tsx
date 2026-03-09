@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchFAQs, type FAQ } from '@/lib/api';
 import { HelpCircle, ChevronDown } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function FAQsPage() {
@@ -18,11 +19,11 @@ export default function FAQsPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorState message={error} />;
-  if (!faqs.length) return <EmptyState icon={<HelpCircle size={40} />} message="No FAQs available yet." />;
+  if (!faqs.length) return <EmptyState icon={<HelpCircle size={40} />} message="No FAQs available" />;
 
   return (
-    <div className="py-6 max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">FAQs</h2>
+    <div className="py-4 max-w-2xl mx-auto">
+      <PageHeader title="FAQs" subtitle="Find answers to common questions about Small Shop Social" />
       <div className="space-y-2">
         {faqs.map((faq) => {
           const isOpen = openId === faq.id;

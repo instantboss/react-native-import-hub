@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchProductNames, type ContentItem } from '@/lib/api';
 import { Tag, Copy, Check } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function ProductNamesPage() {
@@ -28,11 +29,11 @@ export default function ProductNamesPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorState message={error} />;
-  if (!items.length) return <EmptyState icon={<Tag size={40} />} message="No product names available yet." />;
+  if (!items.length) return <EmptyState icon={<Tag size={40} />} message="No product names available" />;
 
   return (
-    <div className="py-6 max-w-xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Product Names</h2>
+    <div className="py-4 max-w-xl mx-auto">
+      <PageHeader title="Product Names" subtitle="Tap any name to copy it to your clipboard" />
       <div className="space-y-1">
         {items.map((item) => {
           const name = item.name || item.title || '';

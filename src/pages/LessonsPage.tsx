@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchLessons, resolveImageUrl, type Lesson } from '@/lib/api';
 import { BookOpen, Image, Clock } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function LessonsPage() {
@@ -22,8 +23,8 @@ export default function LessonsPage() {
   if (!lessons.length) return <EmptyState icon={<BookOpen size={40} />} message="No lessons available yet." />;
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Lessons</h2>
+    <div className="py-4">
+      <PageHeader title="Lessons" subtitle="Learn strategies to grow your boutique business" />
       <div className="space-y-3">
         {lessons.map((lesson) => {
           const thumb = resolveImageUrl(lesson.thumbnail);

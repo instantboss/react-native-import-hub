@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchExtraVideos, resolveImageUrl, type ExtraVideo } from '@/lib/api';
 import { Video, Play } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner, ErrorState, EmptyState } from './TemplatesPage';
 
 export default function ExtrasVideosPage() {
@@ -21,8 +22,8 @@ export default function ExtrasVideosPage() {
   if (!items.length) return <EmptyState icon={<Video size={40} />} message="No extra videos available yet." />;
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Extra Videos</h2>
+    <div className="py-4">
+      <PageHeader title="Extra Videos" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((item) => {
           const thumb = resolveImageUrl(item.image) || item.image_url || item.thumbnail || '';

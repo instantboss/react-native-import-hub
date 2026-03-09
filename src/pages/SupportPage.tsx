@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { submitSupportRequest } from '@/lib/api';
 import { MessageSquare, Send, CheckCircle } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 export default function SupportPage() {
   const [subject, setSubject] = useState('');
@@ -45,16 +46,8 @@ export default function SupportPage() {
   }
 
   return (
-    <div className="py-6 max-w-xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-full bg-[var(--color-brand-pink-light)] flex items-center justify-center">
-          <MessageSquare size={20} className="text-[var(--color-brand-pink)]" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold">Support</h2>
-          <p className="text-sm text-[var(--color-text-muted)]">We're here to help!</p>
-        </div>
-      </div>
+    <div className="py-4 max-w-xl mx-auto">
+      <PageHeader title="Support" subtitle="We're here to help!" />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

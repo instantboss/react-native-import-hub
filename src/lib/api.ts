@@ -179,9 +179,11 @@ export interface Lesson {
 
 export interface ShoppingListItem {
   id: number;
-  name: string;
-  checked: boolean;
-  user_id?: number;
+  name?: string;
+  description?: string;
+  sort_order?: number;
+  image?: string | { url?: string };
+  link?: string;
 }
 
 export interface FAQ {
@@ -367,6 +369,24 @@ export const fetchExtraVideos = (onUpdate?: (d: ExtraVideo[]) => void) =>
   fetchPaginatedContent<ExtraVideo>('/extra_videos', 'extra_videos', 100, 0, onUpdate);
 
 // ==========================================
+// Mentors Nav (Mentors Lounge hub)
+// ==========================================
+export interface MentorNavItem {
+  id: number;
+  name: string;
+  icon?: string | { url?: string } | null;
+  sort_order: number;
+}
+
+export async function fetchMentorsNav(): Promise<MentorNavItem[]> {
+  return cachedFetch('mentors_nav', async () => {
+    const response = await api.get('/mentors_lounge_nav');
+    const items = response.data || [];
+    return items.sort((a: MentorNavItem, b: MentorNavItem) => a.sort_order - b.sort_order);
+  }, CACHE_DURATION.LONG);
+}
+
+// ==========================================
 // Mentors
 // ==========================================
 export async function fetchMentors(perPage = 50, page = 0, onUpdate?: (d: Mentor[]) => void): Promise<Mentor[]> {
@@ -453,20 +473,6 @@ export async function fetchShoppingList(search?: string, perPage = 100): Promise
     const data = response.data;
     return Array.isArray(data) ? data : data?.items || [];
   }, CACHE_DURATION.MEDIUM);
-}
-
-export async function addShoppingListItem(name: string) {
-  const response = await api.post('/shopping_list_items', { name });
-  return response.data;
-}
-
-export async function toggleShoppingListItem(id: number, checked: boolean) {
-  const response = await api.patch(`/shopping_list_items/${id}`, { checked });
-  return response.data;
-}
-
-export async function deleteShoppingListItem(id: number) {
-  return api.delete(`/shopping_list_items/${id}`);
 }
 
 // ==========================================

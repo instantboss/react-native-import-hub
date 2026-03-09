@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Image, Video, FileText } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 const cards = [
   { to: '/extras/graphics', icon: Image, label: 'Extra Graphics', desc: 'Bonus graphics for your shop' },
@@ -11,8 +12,8 @@ export default function ExtrasPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Extras</h2>
+    <div className="py-4">
+      <PageHeader title="Extras" subtitle="Bonus graphics, videos, and PDFs" />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {cards.map(({ to, icon: Icon, label, desc }) => (
           <button

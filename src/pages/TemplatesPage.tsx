@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { fetchTemplates, resolveImageUrl, type Template } from '@/lib/api';
 import { useUser } from '@/contexts/UserContext';
-import { Image, Loader2, AlertCircle } from 'lucide-react';
+import { Layers, Lock, Loader2, AlertCircle } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [lightbox, setLightbox] = useState<string | null>(null);
   const { isTrial } = useUser();
 
   useEffect(() => {
@@ -19,42 +19,46 @@ export default function TemplatesPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorState message={error} />;
-  if (!templates.length) return <EmptyState icon={<Image size={40} />} message="No templates available yet." />;
+  if (!templates.length) return <EmptyState icon={<Layers size={40} />} message="No templates available" />;
 
-  const visible = isTrial ? templates.slice(0, 2) : templates;
+  const handlePress = (t: Template) => {
+    if (t.link) window.open(t.link, '_blank', 'noopener,noreferrer');
+  };
 
   return (
-    <div className="py-6">
-      <h2 className="text-xl font-bold mb-4">Templates</h2>
+    <div className="py-4">
+      <PageHeader title="Templates" subtitle="Ready-to-use templates for your boutique" />
+
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {visible.map((t) => {
+        {templates.map((t, i) => {
           const url = resolveImageUrl(t.image) || t.image_url || '';
+          const isLocked = isTrial && i >= 2;
           return (
             <button
               key={t.id}
-              onClick={() => url && setLightbox(url)}
-              className="group rounded-xl overflow-hidden border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow"
+              onClick={() => isLocked ? window.open('https://instantbossclub.com/sss', '_blank') : handlePress(t)}
+              className="group rounded-xl overflow-hidden border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow text-left"
             >
-              {url ? (
-                <img src={url} alt={t.name || ''} className="w-full aspect-square object-cover" loading="lazy" />
-              ) : (
-                <div className="w-full aspect-square bg-[var(--color-bg-secondary)] flex items-center justify-center">
-                  <Image size={32} className="text-[var(--color-text-muted)]" />
-                </div>
-              )}
-              {t.name && (
-                <p className="px-2 py-2 text-sm text-center truncate">{t.name}</p>
-              )}
+              <div className="relative">
+                {url ? (
+                  <img src={url} alt={t.name || ''} className={`w-full aspect-square object-cover ${isLocked ? 'opacity-30' : ''}`} loading="lazy" />
+                ) : (
+                  <div className="w-full aspect-square bg-[var(--color-bg-secondary)] flex items-center justify-center">
+                    <Layers size={32} className="text-[var(--color-text-muted)]" />
+                  </div>
+                )}
+                {isLocked && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Lock size={24} className="text-white" />
+                  </div>
+                )}
+              </div>
             </button>
           );
         })}
       </div>
 
-      {isTrial && templates.length > 2 && <UpgradeBanner />}
-
-      {lightbox && (
-        <Lightbox src={lightbox} onClose={() => setLightbox(null)} />
-      )}
+      {isTrial && templates.length > 0 && <UpgradeBanner featureName="all templates" />}
     </div>
   );
 }
@@ -86,10 +90,10 @@ export function EmptyState({ icon, message }: { icon: React.ReactNode; message: 
   );
 }
 
-export function UpgradeBanner() {
+export function UpgradeBanner({ featureName }: { featureName?: string } = {}) {
   return (
     <div className="mt-6 rounded-xl bg-gradient-to-r from-[#F963C0] to-[#FF85D0] p-5 text-center text-white">
-      <p className="font-semibold text-lg mb-1">Unlock all content</p>
+      <p className="font-semibold text-lg mb-1">Unlock {featureName || 'all content'}</p>
       <p className="text-sm opacity-90 mb-3">Upgrade your membership to access everything.</p>
       <a
         href="https://instantbossclub.com/sss"
