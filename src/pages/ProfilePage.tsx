@@ -150,7 +150,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1 px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-[var(--color-brand-pink)] hover:opacity-90 disabled:opacity-50 transition"
+              className="flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-medium text-white bg-[var(--color-brand-pink)] hover:opacity-90 disabled:opacity-50 transition"
             >
               <Check size={16} /> {saving ? 'Saving...' : 'Save'}
             </button>
@@ -204,7 +204,7 @@ export default function ProfilePage() {
       {/* Logout */}
       <button
         onClick={handleLogout}
-        className="w-full mt-8 mb-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition"
+        className="w-full mt-8 mb-4 flex items-center justify-center gap-2 py-3 rounded-full border border-red-200 text-red-600 hover:bg-red-50 transition"
       >
         <LogOut size={18} />
         <span className="font-medium">Log Out</span>

@@ -36,7 +36,7 @@ export default function SupportPage() {
         </p>
         <button
           onClick={() => setSubmitted(false)}
-          className="px-6 py-2.5 rounded-xl bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity"
+          className="px-6 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity"
         >
           Send Another Message
         </button>
@@ -94,7 +94,7 @@ export default function SupportPage() {
         <button
           type="submit"
           disabled={submitting || !subject.trim() || !message.trim()}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           <Send size={18} />
           {submitting ? 'Sending...' : 'Send Message'}

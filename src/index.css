@@ -30,3 +30,24 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+/* Slide-up animation for modals */
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
+}
+
+/* Gradient fade for header */
+.header-gradient {
+  background: linear-gradient(to bottom, white 60%, rgba(255, 255, 255, 0));
+}
+
+/* Floating nav blur effect */
+.nav-blur {
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.5);
+}

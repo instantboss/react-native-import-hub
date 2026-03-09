@@ -1,68 +1,89 @@
 import { type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Calendar, User, LayoutGrid } from 'lucide-react';
+import { Home, Calendar } from 'lucide-react';
 import { useNav } from '@/contexts/NavContext';
 import { useUser } from '@/contexts/UserContext';
 import AppHeader from './AppHeader';
-import NavModal from './NavModal';
-
-const navTabs = [
-  { to: '/', icon: Home, label: 'Home' },
-  { to: '/daily-content', icon: Calendar, label: 'Calendar' },
-  { to: '/profile', icon: User, label: 'Profile' },
-] as const;
+import NavFab from './NavFab';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { isMenuOpen, toggleMenu, closeMenu } = useNav();
-  const { unreadCount } = useUser();
+  const { unreadCount, user } = useUser();
   const location = useLocation();
 
-  // Determine if we need a back button (not on root pages)
   const isNestedPage = location.pathname.split('/').filter(Boolean).length > 1;
+
+  // Profile image or fallback
+  const profileImg = user?.profile_image?.url || user?.profile_image?.path || '';
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
       <AppHeader showBack={isNestedPage} unreadCount={unreadCount} />
 
       {/* Main content */}
-      <main className="flex-1 w-full max-w-5xl mx-auto px-4 pt-16 pb-20">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 pt-20 pb-24">
         {children}
       </main>
 
-      {/* Bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[var(--color-border-light)]">
-        <div className="max-w-5xl mx-auto flex items-center justify-around h-16">
-          {navTabs.map(({ to, icon: Icon, label }) => (
+      {/* Floating bottom navigation - pill shape */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex justify-center px-4 pb-3 pointer-events-none">
+        {/* Gradient fade */}
+        <div className="absolute inset-x-0 -top-10 bottom-0 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+
+        <nav className="relative pointer-events-auto rounded-full border-[1.5px] border-white/80 shadow-[0_4px_16px_rgba(0,0,0,0.1)]">
+          <div className="nav-blur rounded-full flex items-center justify-center py-2 px-3 gap-1">
+            {/* Home */}
             <NavLink
-              key={to}
-              to={to}
+              to="/"
+              end
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${
-                  isActive ? 'text-[var(--color-brand-pink)]' : 'text-[var(--color-text-muted)]'
+                `flex flex-col items-center justify-center min-w-[56px] py-1 px-2 text-xs font-medium tracking-tight ${
+                  isActive ? 'text-[var(--color-brand-pink)]' : 'text-[var(--color-text-primary)]'
                 }`
               }
             >
-              <Icon size={22} />
-              <span>{label}</span>
+              <Home size={22} />
+              <span className="mt-1">Home</span>
             </NavLink>
-          ))}
 
-          {/* Grid menu button */}
-          <button
-            onClick={toggleMenu}
-            className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${
-              isMenuOpen ? 'text-[var(--color-brand-pink)]' : 'text-[var(--color-text-muted)]'
-            }`}
-            aria-label="Menu"
-          >
-            <LayoutGrid size={22} />
-            <span>More</span>
-          </button>
-        </div>
-      </nav>
+            {/* Calendar */}
+            <NavLink
+              to="/daily-content"
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center min-w-[56px] py-1 px-2 text-xs font-medium tracking-tight ${
+                  isActive ? 'text-[var(--color-brand-pink)]' : 'text-[var(--color-text-primary)]'
+                }`
+              }
+            >
+              <Calendar size={22} />
+              <span className="mt-1">Calendar</span>
+            </NavLink>
 
-      {/* Nav modal overlay */}
-      {isMenuOpen && <NavModal onClose={closeMenu} />}
+            {/* Profile with user image */}
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center min-w-[56px] py-1 px-2 text-xs font-medium tracking-tight ${
+                  isActive ? 'text-[var(--color-brand-pink)]' : 'text-[var(--color-text-primary)]'
+                }`
+              }
+            >
+              <div className="w-6 h-6 rounded-full bg-[var(--color-bg-secondary)] border border-[var(--color-border-light)] overflow-hidden">
+                {profileImg ? (
+                  <img src={profileImg} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-[var(--color-text-muted)]">
+                    {(user?.first_name?.[0] || '?').toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <span className="mt-1">Profile</span>
+            </NavLink>
+          </div>
+        </nav>
+      </div>
+
+      {/* FAB + Grid nav */}
+      <NavFab />
     </div>
   );
 }

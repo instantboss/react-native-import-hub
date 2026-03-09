@@ -87,7 +87,7 @@ export default function ShoppingListPage() {
         <button
           type="submit"
           disabled={adding || !newItem.trim()}
-          className="px-4 py-2.5 rounded-xl bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-1.5"
+          className="px-4 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-1.5"
         >
           <Plus size={18} />
           <span className="hidden sm:inline">Add</span>

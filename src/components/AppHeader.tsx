@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Bell } from 'lucide-react';
 
 interface AppHeaderProps {
@@ -8,40 +8,46 @@ interface AppHeaderProps {
 
 export default function AppHeader({ showBack, unreadCount = 0 }: AppHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[var(--color-border-light)]">
-      <div className="max-w-5xl mx-auto flex items-center justify-between h-14 px-4">
+    <header className="fixed top-0 left-0 right-0 z-50 header-gradient">
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 pt-3 pb-4">
         {/* Left: back button or spacer */}
-        <div className="w-10 flex items-center">
+        <div className="w-9 h-9 flex items-center justify-center">
           {showBack && (
             <button
               onClick={() => navigate(-1)}
-              className="p-1 -ml-1 text-[var(--color-text-primary)] hover:text-[var(--color-brand-pink)] transition-colors"
+              className="text-[#777] hover:text-[var(--color-brand-pink)] transition-colors"
               aria-label="Go back"
             >
-              <ArrowLeft size={22} />
+              <ArrowLeft size={24} />
             </button>
           )}
         </div>
 
-        {/* Center: title */}
-        <h1 className="text-base font-semibold text-[var(--color-text-primary)] tracking-tight">
-          Small Shop Social
-        </h1>
+        {/* Center: Logo */}
+        <button
+          onClick={() => location.pathname !== '/' && navigate('/')}
+          className="py-1"
+        >
+          <img
+            src="/logo.png"
+            alt="Small Shop Social"
+            className="h-[50px] w-auto object-contain"
+          />
+        </button>
 
         {/* Right: notification bell */}
-        <div className="w-10 flex items-center justify-end">
+        <div className="w-9 h-9 flex items-center justify-center">
           <button
             onClick={() => navigate('/notifications')}
-            className="relative p-1 text-[var(--color-text-primary)] hover:text-[var(--color-brand-pink)] transition-colors"
+            className="relative text-[#777] hover:text-[var(--color-brand-pink)] transition-colors"
             aria-label="Notifications"
           >
-            <Bell size={22} />
+            <Bell size={20} />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-[var(--color-brand-pink)] text-white text-[10px] font-bold leading-none px-1">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[var(--color-brand-pink)] border-[1.5px] border-white" />
             )}
           </button>
         </div>
