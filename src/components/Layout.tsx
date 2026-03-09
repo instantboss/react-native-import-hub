@@ -1,19 +1,18 @@
 import { type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Calendar } from 'lucide-react';
-import { useNav } from '@/contexts/NavContext';
 import { useUser } from '@/contexts/UserContext';
 import AppHeader from './AppHeader';
 import NavFab from './NavFab';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { unreadCount, user } = useUser();
+  const { unreadCount, user, logoUrl } = useUser();
   const location = useLocation();
 
   const isNestedPage = location.pathname.split('/').filter(Boolean).length > 1;
 
-  // Profile image or fallback
-  const profileImg = user?.profile_image?.url || user?.profile_image?.path || '';
+  // Use logo (business image) like RN app
+  const profileImg = logoUrl || '';
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex flex-col">
@@ -58,7 +57,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <span className="mt-1">Calendar</span>
             </NavLink>
 
-            {/* Profile with user image */}
+            {/* Profile with user logo (matches RN FloatingNav) */}
             <NavLink
               to="/profile"
               className={({ isActive }) =>

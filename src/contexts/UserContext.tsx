@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { fetchUserProfile, getNotificationCount, type UserProfile } from '@/lib/api';
+import { fetchUserProfile, getNotificationCount, resolveImageUrl, type UserProfile } from '@/lib/api';
 import { getAuthToken, saveAuthToken, saveUserData, removeAuthToken, removeUserData, isAuthenticated } from '@/lib/auth';
 import { clearAllCache } from '@/lib/cache';
 
@@ -7,6 +7,7 @@ interface UserContextValue {
   user: UserProfile | null;
   loading: boolean;
   unreadCount: number;
+  logoUrl: string | null;
   isTrial: boolean;
   isPaid: boolean;
   isAdmin: boolean;
@@ -26,6 +27,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const isTrial = !!user?.trial_member || !!user?.free_member;
   const isPaid = !!user?.base_member && !isTrial;
   const isAdmin = !!user?.admin || !!user?.super_admin;
+  const logoUrl = resolveImageUrl(user?.logo) || null;
 
   const refreshProfile = useCallback(async () => {
     try {
@@ -85,7 +87,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   void getAuthToken;
 
   return (
-    <UserContext.Provider value={{ user, loading, unreadCount, isTrial, isPaid, isAdmin, refreshProfile, refreshUnreadCount, login, logout }}>
+    <UserContext.Provider value={{ user, loading, unreadCount, logoUrl, isTrial, isPaid, isAdmin, refreshProfile, refreshUnreadCount, login, logout }}>
       {children}
     </UserContext.Provider>
   );

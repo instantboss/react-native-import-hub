@@ -2,8 +2,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Grid, X } from 'lucide-react';
 import { useNav } from '@/contexts/NavContext';
 import { useUser } from '@/contexts/UserContext';
-import { resolveImageUrl, type NavItem } from '@/lib/api';
+import { type NavItem } from '@/lib/api';
 
+// Map Xano nav item IDs to internal routes (matches RN app exactly)
 const NAV_ROUTES: Record<number, string> = {
   1: '/daily-content',
   2: '/mentors',
@@ -23,11 +24,27 @@ const NAV_ROUTES: Record<number, string> = {
   19: '/groups',
 };
 
-function shouldShowItem(item: NavItem, isTrial: boolean, isPaid: boolean, isAdmin: boolean): boolean {
-  if (isAdmin) return true;
-  if (isTrial) return !!item.show_trial;
-  if (isPaid) return !!item.show_basic || !!item.show_trial;
-  return !!item.show_trial;
+// Fallback name-based routing (matches RN app)
+const NAME_ROUTES: Record<string, string> = {
+  'Support': '/support',
+  'Help': '/support',
+  'FAQs': '/faqs',
+};
+
+// Helper to get icon URL from various formats (matches RN getIconUrl)
+function getIconUrl(icon: NavItem['icon']): string | null {
+  if (!icon) return null;
+  if (typeof icon === 'string') return icon;
+  if (typeof icon === 'object' && icon.url) return icon.url;
+  return null;
+}
+
+function shouldShowItem(item: NavItem, isTrial: boolean, isBasic: boolean, isPaid: boolean, isAdmin: boolean): boolean {
+  if (isAdmin || isPaid) return true;
+  if (isBasic && item.show_basic) return true;
+  if (isTrial && item.show_trial) return true;
+  if (!isTrial && !isBasic && !isPaid) return !!item.show_trial;
+  return false;
 }
 
 export default function NavFab() {
@@ -36,20 +53,38 @@ export default function NavFab() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // isBasic = base_member and not trial (matches RN)
+  const isBasic = isPaid;
+
   const visibleItems = navItems
-    .filter((item) => shouldShowItem(item, isTrial, isPaid, isAdmin) && NAV_ROUTES[item.id])
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+    .filter((item) => shouldShowItem(item, isTrial, isBasic, isPaid, isAdmin))
+    .sort((a, b) => (a.order ?? a.sort_order ?? 0) - (b.order ?? b.sort_order ?? 0));
 
   const handleItemClick = (item: NavItem) => {
-    const route = NAV_ROUTES[item.id];
-    if (route) {
-      navigate(route);
-      closeMenu();
+    closeMenu();
+
+    // Try ID-based route first
+    const routeById = NAV_ROUTES[item.id];
+    if (routeById) {
+      navigate(routeById);
+      return;
+    }
+
+    // Fall back to name-based route
+    const routeByName = NAME_ROUTES[item.name];
+    if (routeByName) {
+      navigate(routeByName);
+      return;
+    }
+
+    // External link
+    if (item.link && item.link.startsWith('http')) {
+      window.open(item.link, '_blank');
     }
   };
 
-  const isActive = (id: number) => {
-    const route = NAV_ROUTES[id];
+  const isActive = (item: NavItem) => {
+    const route = NAV_ROUTES[item.id] || NAME_ROUTES[item.name];
     return route ? location.pathname.startsWith(route) : false;
   };
 
@@ -77,8 +112,8 @@ export default function NavFab() {
             ) : (
               <div className="grid grid-cols-4 gap-1.5">
                 {visibleItems.map((item) => {
-                  const imageUrl = resolveImageUrl(item.image);
-                  const active = isActive(item.id);
+                  const iconUrl = getIconUrl(item.icon);
+                  const active = isActive(item);
                   return (
                     <button
                       key={item.id}
@@ -89,8 +124,8 @@ export default function NavFab() {
                           : 'bg-white/35 border-white/80 hover:bg-white/60'
                       }`}
                     >
-                      {imageUrl ? (
-                        <img src={imageUrl} alt="" className="w-7 h-7 object-contain mb-1" />
+                      {iconUrl ? (
+                        <img src={iconUrl} alt="" className="w-7 h-7 object-contain mb-1" />
                       ) : (
                         <div className="w-7 h-7 rounded-md bg-[var(--color-bg-secondary)] flex items-center justify-center mb-1">
                           <Grid size={16} className="text-[var(--color-text-secondary)]" />

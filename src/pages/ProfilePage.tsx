@@ -92,7 +92,8 @@ export default function ProfilePage() {
     navigate('/login', { replace: true });
   }, [logout, navigate]);
 
-  const profileImgUrl = resolveImageUrl(user?.profile_image);
+  // Use logo (business image) like RN app, fallback to profile_image
+  const profileImgUrl = resolveImageUrl(user?.logo) || resolveImageUrl(user?.profile_image);
   const subscriptionLabel = user?.trial_member || user?.free_member
     ? 'Trial / Free'
     : user?.base_member

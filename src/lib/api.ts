@@ -85,6 +85,7 @@ export interface DailyContent {
   image_1?: { url: string; path?: string };
   image_2?: { url: string; path?: string };
   image_3?: { url: string; path?: string };
+  engagement_images?: (string | { url?: string; path?: string })[];
   hashtags?: string;
   caption?: string;
   holiday?: string;
@@ -92,6 +93,8 @@ export interface DailyContent {
   afternoon_post?: string;
   evening_post?: string;
   extra_tasks?: string;
+  posting_schedule?: string;
+  business_tips?: string;
   morning_places_text?: string;
   afternoon_places_text?: string;
   evening_places_text?: string;
@@ -100,11 +103,12 @@ export interface DailyContent {
 export interface NavItem {
   id: number;
   name: string;
-  icon?: string;
+  icon?: string | { url?: string } | null;
   image?: UserProfileImage | null;
   show_trial?: boolean;
   show_basic?: boolean;
   sort_order?: number;
+  order?: number;
   link?: string;
 }
 
@@ -531,7 +535,19 @@ export async function fetchVendors(onUpdate?: (d: ContentItem[]) => void): Promi
 // ==========================================
 // Announcements
 // ==========================================
-export async function fetchCurrentAnnouncement(): Promise<{ message?: string; active?: boolean } | null> {
+export interface Announcement {
+  id?: number;
+  heading?: string;
+  description?: string;
+  label?: string;
+  button_text?: string;
+  button_link?: string;
+  message?: string;
+  active?: boolean;
+  image?: UserProfileImage | null;
+}
+
+export async function fetchCurrentAnnouncement(): Promise<Announcement | null> {
   try {
     const response = await api.get('/announcements/current');
     return response.data;
