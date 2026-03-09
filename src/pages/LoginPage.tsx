@@ -34,7 +34,8 @@ export default function LoginPage() {
       setStep('code');
       setResendCooldown(60);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send magic link. Please try again.');
+      console.error('Magic link request error:', err.response?.status, err.response?.data, err.message);
+      setError(err.response?.data?.message || err.message || 'Failed to send magic link. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +53,9 @@ export default function LoginPage() {
       login(res.authToken, res.user);
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid or expired code. Please try again.');
+      console.error('Magic login error:', err.response?.status, err.response?.data, err.message);
+      const msg = err.response?.data?.message || err.message || 'Something went wrong. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
