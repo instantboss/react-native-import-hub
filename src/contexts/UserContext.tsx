@@ -9,6 +9,7 @@ interface UserContextValue {
   unreadCount: number;
   logoUrl: string | null;
   isTrial: boolean;
+  isBasic: boolean;
   isPaid: boolean;
   isAdmin: boolean;
   refreshProfile: () => Promise<void>;
@@ -24,9 +25,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const isTrial = !!user?.trial_member || !!user?.free_member;
-  const isPaid = !!user?.base_member && !isTrial;
-  const isAdmin = !!user?.admin || !!user?.super_admin;
+  // Computed subscription status — matches RN app exactly
+  const isTrial = user?.trial_member === true;
+  const isBasic = user?.free_member === true; // free_member = basic tier
+  // User is paid if they're not a trial member (free members get full access too)
+  const isPaid = user ? !user.trial_member : false;
+  const isAdmin = user?.admin === true || user?.super_admin === true;
   const logoUrl = resolveImageUrl(user?.logo) || null;
 
   const refreshProfile = useCallback(async () => {
@@ -87,7 +91,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   void getAuthToken;
 
   return (
-    <UserContext.Provider value={{ user, loading, unreadCount, logoUrl, isTrial, isPaid, isAdmin, refreshProfile, refreshUnreadCount, login, logout }}>
+    <UserContext.Provider value={{ user, loading, unreadCount, logoUrl, isTrial, isBasic, isPaid, isAdmin, refreshProfile, refreshUnreadCount, login, logout }}>
       {children}
     </UserContext.Provider>
   );

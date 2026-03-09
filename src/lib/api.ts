@@ -489,7 +489,7 @@ export async function fetchFAQs(perPage = 50, page = 0): Promise<FAQ[]> {
 // ==========================================
 // Support
 // ==========================================
-export async function submitSupportRequest(data: { subject: string; message: string }) {
+export async function submitSupportRequest(data: { subject: string; message: string; category?: string }) {
   const response = await api.post('/support_request', data);
   return response.data;
 }
@@ -575,5 +575,94 @@ export async function fetchAskMentorItems(): Promise<ContentItem[]> {
 
 export async function submitMentorQuestion(data: { question: string }) {
   const response = await api.post('/ask_mentor', data);
+  return response.data;
+}
+
+// ==========================================
+// User Generated Images (composited images)
+// ==========================================
+export interface UserGeneratedImage {
+  id: number;
+  user_id: number;
+  date: string;
+  name?: string;
+  image: string; // Cloudflare R2 URL
+  daily_content_id?: number;
+  content_image_number?: number;
+}
+
+const PLACEHOLDER_USER_ID = 29;
+
+export async function fetchUserGeneratedImages(
+  userId: number,
+  startDate?: string,
+  endDate?: string,
+  limit = 50,
+  offset = 0,
+): Promise<{ items: UserGeneratedImage[]; nextPage: number | null }> {
+  const cacheKey = `user_gen_images_${userId}_${startDate}_${endDate}_${limit}_${offset}`;
+  return cachedFetch(cacheKey, async () => {
+    const params: Record<string, unknown> = { user_id: userId, limit, offset };
+    if (startDate) params.start = startDate;
+    if (endDate) params.end = endDate;
+
+    const response = await api.get('/dynamic_social_graphics', { params });
+    const data = response.data;
+
+    // Fallback to placeholder user if no images
+    if ((!data.items || data.items.length === 0) && userId !== PLACEHOLDER_USER_ID) {
+      params.user_id = PLACEHOLDER_USER_ID;
+      const fallback = await api.get('/dynamic_social_graphics', { params });
+      return fallback.data;
+    }
+    return data;
+  }, CACHE_DURATION.MEDIUM);
+}
+
+export async function fetchUserImagesForDate(
+  userId: number,
+  date: string,
+): Promise<UserGeneratedImage[]> {
+  const cacheKey = `user_images_date_${userId}_${date}`;
+  return cachedFetch(cacheKey, async () => {
+    const params: Record<string, unknown> = {
+      user_id: userId, start: date, end: date, limit: 10, offset: 0,
+    };
+    const response = await api.get('/dynamic_social_graphics', { params });
+    const data = response.data;
+
+    if ((!data.items || data.items.length === 0) && userId !== PLACEHOLDER_USER_ID) {
+      params.user_id = PLACEHOLDER_USER_ID;
+      const fallback = await api.get('/dynamic_social_graphics', { params });
+      return fallback.data.items || [];
+    }
+    return data.items || [];
+  }, CACHE_DURATION.MEDIUM);
+}
+
+// ==========================================
+// AI Products
+// ==========================================
+export interface AIProduct {
+  id: number;
+  created_at: number;
+  image?: { url?: string };
+  image_url?: string;
+  name?: string;
+  title?: string;
+  description?: string;
+  social_post?: string;
+  hashtags?: string;
+  notes?: string;
+  response?: string;
+}
+
+export async function fetchAIProducts(): Promise<AIProduct[]> {
+  const response = await api.get('/ai_product_details');
+  return Array.isArray(response.data) ? response.data : response.data?.items || [];
+}
+
+export async function fetchAIProduct(id: number): Promise<AIProduct> {
+  const response = await api.get(`/ai_product_details/${id}`);
   return response.data;
 }

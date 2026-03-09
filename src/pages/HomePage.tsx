@@ -5,9 +5,11 @@ import { useUser } from '@/contexts/UserContext';
 import {
   fetchCurrentAnnouncement,
   fetchDailyContentToday,
+  fetchUserImagesForDate,
   resolveImageUrl,
   type DailyContent,
   type Announcement,
+  type UserGeneratedImage,
 } from '@/lib/api';
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -45,6 +47,7 @@ export default function HomePage() {
   const { user, isPaid } = useUser();
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [todayContent, setTodayContent] = useState<DailyContent | null>(null);
+  const [userImages, setUserImages] = useState<UserGeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
 
   const today = new Date();
@@ -55,19 +58,32 @@ export default function HomePage() {
     Promise.all([
       fetchCurrentAnnouncement(),
       fetchDailyContentToday(),
-    ]).then(([ann, content]) => {
+    ]).then(async ([ann, content]) => {
       if (!mounted) return;
       setAnnouncement(ann);
       setTodayContent(content);
+
+      // For paid users, fetch their composited images instead of generic ones
+      if (isPaid && user?.id && content?.date) {
+        try {
+          const imgs = await fetchUserImagesForDate(user.id, content.date);
+          if (mounted) setUserImages(imgs);
+        } catch { /* use fallback engagement images */ }
+      }
     }).catch(console.error)
       .finally(() => mounted && setLoading(false));
     return () => { mounted = false; };
-  }, []);
+  }, [isPaid, user?.id]);
 
-  // Get engagement images
+  // Get images — paid users see their composited images, trial users see engagement images
   const getImages = () => {
+    // Paid users: use composited user images (with fallback to user 29)
+    if (isPaid && userImages.length > 0) {
+      return userImages.map((img) => img.image).filter(Boolean);
+    }
+
+    // Fallback: engagement images from daily content
     if (!todayContent) return [];
-    // Try engagement_images first, then fall back to image_1/2/3
     if (todayContent.engagement_images && todayContent.engagement_images.length > 0) {
       return todayContent.engagement_images.map((img) => {
         if (typeof img === 'string') return img;
@@ -93,21 +109,6 @@ export default function HomePage() {
         </h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">{formattedDate}</p>
       </div>
-
-      {/* Upgrade banner for trial users */}
-      {!isPaid && (
-        <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-[var(--color-brand-pink)] to-[#D946EF] text-white text-center">
-          <p className="font-semibold mb-2">Upgrade to unlock all premium features</p>
-          <a
-            href="https://instantbossclub.com/sss"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-5 py-2 rounded-full bg-white text-[var(--color-brand-pink)] font-semibold text-sm hover:opacity-90 transition"
-          >
-            Upgrade Now
-          </a>
-        </div>
-      )}
 
       {/* Holiday banner */}
       {isPaid && todayContent?.holiday && (

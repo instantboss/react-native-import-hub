@@ -34,6 +34,8 @@ import ProductNamesPage from './pages/ProductNamesPage'
 import VendorsPage from './pages/VendorsPage'
 import FAQsPage from './pages/FAQsPage'
 import SupportPage from './pages/SupportPage'
+import ImagesPage from './pages/ImagesPage'
+import AIPage from './pages/AIPage'
 import OldDashPage from './pages/OldDashPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -91,6 +93,8 @@ export default function App() {
                 <Route path="/vendors" element={<VendorsPage />} />
                 <Route path="/faqs" element={<FAQsPage />} />
                 <Route path="/support" element={<SupportPage />} />
+                <Route path="/images" element={<ImagesPage />} />
+                <Route path="/ai" element={<AIPage />} />
                 <Route path="/old-dash" element={<OldDashPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

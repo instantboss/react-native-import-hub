@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Copy, Check } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
-import { fetchDailyContent31, resolveImageUrl, type DailyContent } from '@/lib/api';
+import { fetchDailyContent31, fetchUserImagesForDate, resolveImageUrl, type DailyContent, type UserGeneratedImage } from '@/lib/api';
 import PageHeader from '@/components/PageHeader';
 
 function formatDateDisplay(dateStr: string): string {
@@ -41,23 +41,34 @@ function SectionHeading({ children }: { children: string }) {
 }
 
 export default function DailyContentDetailPage() {
-  useUser();
+  const { user, isPaid } = useUser();
   const { date } = useParams<{ date: string }>();
   const [content, setContent] = useState<DailyContent | null>(null);
+  const [userImages, setUserImages] = useState<UserGeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!date) return;
     fetchDailyContent31()
-      .then((items) => {
+      .then(async (items) => {
         const match = items.find((item) => (item.date || item.content_date) === date);
-        if (match) setContent(match);
-        else setError('No content found for this date.');
+        if (match) {
+          setContent(match);
+          // Fetch user's composited images for this date
+          if (isPaid && user?.id) {
+            try {
+              const imgs = await fetchUserImagesForDate(user.id, date);
+              setUserImages(imgs);
+            } catch { /* fallback to engagement images */ }
+          }
+        } else {
+          setError('No content found for this date.');
+        }
       })
       .catch(() => setError('Failed to load content.'))
       .finally(() => setLoading(false));
-  }, [date]);
+  }, [date, isPaid, user?.id]);
 
   if (loading) {
     return (
@@ -81,8 +92,11 @@ export default function DailyContentDetailPage() {
     );
   }
 
-  // Get images - try engagement_images first, then image_1/2/3
+  // Get images — paid users see composited images, trial sees engagement images
   const getImages = (): string[] => {
+    if (isPaid && userImages.length > 0) {
+      return userImages.map((img) => img.image).filter(Boolean);
+    }
     if (content.engagement_images && content.engagement_images.length > 0) {
       return content.engagement_images.map((img) => {
         if (typeof img === 'string') return img;
