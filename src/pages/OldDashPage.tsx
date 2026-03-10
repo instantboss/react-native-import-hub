@@ -13,6 +13,13 @@ function getCurrentMonthYear() {
   return { month, year, monthStr, label: `${MONTHS[month]} ${year}` };
 }
 
+function openUrl(url: string) {
+  // Use window.open for maximum compatibility (works in iframes, Lovable preview, etc.)
+  const w = window.open(url, '_blank');
+  // Fallback: if popup was blocked, navigate directly
+  if (!w) window.location.href = url;
+}
+
 export default function OldDashPage() {
   const { year, monthStr, label } = getCurrentMonthYear();
   const baseUrl = 'https://images.instantbossclub.com/calendars';
@@ -37,24 +44,20 @@ export default function OldDashPage() {
             Your monthly content calendar with daily posts, hashtags, and captions.
           </p>
           <div className="flex gap-3">
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => openUrl(pdfUrl)}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border border-[var(--color-brand-pink)] text-[var(--color-brand-pink)] font-medium hover:bg-[var(--color-brand-pink-light)] transition-colors text-sm"
             >
               <ExternalLink size={16} />
               View PDF
-            </a>
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            </button>
+            <button
+              onClick={() => openUrl(pdfUrl)}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity text-sm"
             >
               <Download size={16} />
               Download
-            </a>
+            </button>
           </div>
         </div>
 
@@ -64,15 +67,13 @@ export default function OldDashPage() {
           <p className="text-sm text-[var(--color-text-muted)] mb-4">
             All engagement images for this month in one download.
           </p>
-          <a
-            href={zipUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity text-sm"
+          <button
+            onClick={() => openUrl(zipUrl)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity text-sm"
           >
             <Download size={16} />
             Download ZIP
-          </a>
+          </button>
         </div>
       </div>
     </div>
