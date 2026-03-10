@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { fetchPresets, resolveImageUrl, type Preset } from '@/lib/api';
 import { useUser } from '@/contexts/UserContext';
-import { Sliders, Lock, Play, X } from 'lucide-react';
+import { Sliders, Lock, Play, X, Download } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
-import { LoadingSpinner, ErrorState, EmptyState, UpgradeBanner, Lightbox } from './TemplatesPage';
+import { LoadingSpinner, ErrorState, EmptyState, UpgradeBanner } from './TemplatesPage';
 
 const INTRO_VIDEO_ID = 'jO_blUegYOk';
 
@@ -16,7 +16,6 @@ export default function PresetsPage() {
   const [items, setItems] = useState<Preset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [lightbox, setLightbox] = useState<string | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const { isTrial } = useUser();
 
@@ -38,8 +37,11 @@ export default function PresetsPage() {
       window.open('https://instantbossclub.com/sss', '_blank');
       return;
     }
-    const url = resolveImageUrl(item.image) || item.image_url || '';
-    if (url) setLightbox(url);
+    // Open the Dropbox download link (same as RN app)
+    const downloadUrl = getDropboxDirectUrl(item.link || '');
+    if (downloadUrl) {
+      window.open(downloadUrl, '_blank');
+    }
   };
 
   return (
@@ -82,9 +84,13 @@ export default function PresetsPage() {
                     <Sliders size={32} className="text-[var(--color-text-muted)]" />
                   </div>
                 )}
-                {isLocked && (
+                {isLocked ? (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <Lock size={24} className="text-white" />
+                  </div>
+                ) : item.link && (
+                  <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Download size={16} className="text-white" />
                   </div>
                 )}
               </div>
@@ -94,8 +100,6 @@ export default function PresetsPage() {
       </div>
 
       {isTrial && items.length > 0 && <UpgradeBanner featureName="all presets" />}
-
-      {lightbox && <Lightbox src={lightbox} onClose={() => setLightbox(null)} />}
 
       {/* YouTube Video Modal */}
       {videoOpen && (
