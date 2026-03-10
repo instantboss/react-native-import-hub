@@ -48,7 +48,8 @@ export default function OldDashPage() {
             </a>
             <a
               href={pdfUrl}
-              download
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[var(--color-brand-pink)] text-white font-medium hover:opacity-90 transition-opacity text-sm"
             >
               <Download size={16} />
