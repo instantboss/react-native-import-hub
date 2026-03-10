@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Image as ImageIcon, Download, X } from 'lucide-react';
+import { Image as ImageIcon } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { fetchUserGeneratedImages, type UserGeneratedImage } from '@/lib/api';
 import PageHeader from '@/components/PageHeader';
-import { LoadingSpinner, EmptyState, UpgradeBanner } from './TemplatesPage';
+import { LoadingSpinner, EmptyState, UpgradeBanner, Lightbox } from './TemplatesPage';
 
 interface DisplayImage {
   id: number;
@@ -58,23 +58,6 @@ export default function ImagesPage() {
     todayImages: images.filter((img) => img.date === today),
     futureImages: images.filter((img) => img.date !== today),
   }), [images, today]);
-
-  const handleDownload = async (image: DisplayImage) => {
-    try {
-      const res = await fetch(image.url, { mode: 'cors' });
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = `${image.name || `sss-image-${image.id}`}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(image.url, '_blank');
-    }
-  };
 
   if (loading) return <LoadingSpinner />;
 
@@ -133,29 +116,13 @@ export default function ImagesPage() {
 
       {!isPaid && images.length > 0 && <UpgradeBanner featureName="personalized images" />}
 
-      {/* Image preview modal */}
       {selectedImage && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setSelectedImage(null)} />
-          <div className="relative z-10 bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg p-5 max-h-[85vh] overflow-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold truncate pr-4">{getImageTitle(selectedImage)}</h3>
-              <button onClick={() => setSelectedImage(null)} className="p-1">
-                <X size={24} />
-              </button>
-            </div>
-            <div className="rounded-xl overflow-hidden bg-[var(--color-bg-secondary)] mb-5">
-              <img src={selectedImage.url} alt="" className="w-full aspect-square object-contain" />
-            </div>
-            <button
-              onClick={() => handleDownload(selectedImage)}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-3xl bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
-            >
-              <Download size={20} />
-              Save Image
-            </button>
-          </div>
-        </div>
+        <Lightbox
+          src={selectedImage.url}
+          onClose={() => setSelectedImage(null)}
+          title={getImageTitle(selectedImage)}
+          downloadLabel={`${selectedImage.name || `sss-image-${selectedImage.id}`}.jpg`}
+        />
       )}
     </div>
   );

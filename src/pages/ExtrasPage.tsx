@@ -227,46 +227,38 @@ export default function ExtrasPage() {
         )}
       </div>
 
-      {/* Image Lightbox with Download */}
+      {/* Image Lightbox */}
       {lightbox && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setLightbox(null)}>
-          <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <X size={24} className="text-white" />
-          </button>
-          <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <img src={lightbox.src} alt="" className="max-w-full max-h-[70vh] rounded-lg object-contain" />
-            <a
-              href={lightbox.downloadUrl}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
-            >
-              <Download size={18} />
-              Download Image
-            </a>
-          </div>
-        </div>
+        <Lightbox
+          src={lightbox.src}
+          onClose={() => setLightbox(null)}
+          title="Graphic"
+          downloadUrl={lightbox.downloadUrl}
+          buttonLabel="Save Image"
+        />
       )}
 
       {/* Video Modal */}
       {videoModal && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setVideoModal(null)}>
-          <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <X size={24} className="text-white" />
-          </button>
-          <div className="flex flex-col items-center gap-4 w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
-            <video src={videoModal} controls autoPlay className="w-full rounded-lg" />
-            <a
-              href={videoModal}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setVideoModal(null)} />
+          <div className="relative z-10 bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg p-5 max-h-[85vh] overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Video</h3>
+              <button onClick={() => setVideoModal(null)} className="p-1">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="rounded-xl overflow-hidden bg-[var(--color-bg-secondary)] mb-5">
+              <video src={videoModal} controls autoPlay className="w-full" />
+            </div>
+            <button
+              onClick={() => window.open(videoModal, '_blank')}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-3xl bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
             >
-              <Download size={18} />
-              Download Video
-            </a>
+              <Download size={20} />
+              Save Video
+            </button>
           </div>
         </div>
       )}

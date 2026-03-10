@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchTemplates, resolveImageUrl, type Template } from '@/lib/api';
 import { useUser } from '@/contexts/UserContext';
-import { Layers, Lock, Loader2, AlertCircle } from 'lucide-react';
+import { Layers, Lock, Loader2, AlertCircle, Download, X } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 
 export default function TemplatesPage() {
@@ -107,11 +107,53 @@ export function UpgradeBanner({ featureName }: { featureName?: string } = {}) {
   );
 }
 
-export function Lightbox({ src, onClose }: { src: string; onClose: () => void }) {
+async function handleImageDownload(url: string, name?: string) {
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = name || 'image.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    window.open(url, '_blank');
+  }
+}
+
+export function Lightbox({ src, onClose, title, downloadUrl, downloadLabel, buttonLabel }: {
+  src: string;
+  onClose: () => void;
+  title?: string;
+  downloadUrl?: string;
+  downloadLabel?: string;
+  buttonLabel?: string;
+}) {
+  const dlUrl = downloadUrl || src;
   return (
-    <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" onClick={onClose}>
-      <button onClick={onClose} className="absolute top-4 right-4 text-white text-3xl font-light leading-none">&times;</button>
-      <img src={src} alt="" className="max-w-full max-h-[90vh] rounded-lg" onClick={(e) => e.stopPropagation()} />
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative z-10 bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg p-5 max-h-[85vh] overflow-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold truncate pr-4">{title || 'Preview'}</h3>
+          <button onClick={onClose} className="p-1">
+            <X size={24} />
+          </button>
+        </div>
+        <div className="rounded-xl overflow-hidden bg-[var(--color-bg-secondary)] mb-5">
+          <img src={src} alt="" className="w-full object-contain" />
+        </div>
+        <button
+          onClick={() => handleImageDownload(dlUrl, downloadLabel)}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-3xl bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
+        >
+          <Download size={20} />
+          {buttonLabel || 'Save Image'}
+        </button>
+      </div>
     </div>
   );
 }
