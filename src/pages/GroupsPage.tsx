@@ -42,7 +42,7 @@ export default function GroupsPage() {
             <p className="text-sm font-semibold text-[var(--color-text-primary)] text-center leading-tight mb-2">
               {group.name || group.title || 'Group'}
             </p>
-            {(group.link || group.url) && (
+            {group.link && (
               <div className="flex items-center gap-1">
                 <ExternalLink size={14} className="text-[var(--color-brand-pink)]" />
                 <span className="text-xs text-[var(--color-text-secondary)]">Open Group</span>
