@@ -64,7 +64,7 @@ export default function ShoppingListPage() {
       ) : (
         <div className="space-y-3">
           {filteredItems.map((item) => {
-            const imageUrl = resolveImageUrl(item.image);
+            const imageUrl = typeof item.image === 'string' ? item.image : resolveImageUrl(item.image as { url?: string; path?: string } | null | undefined);
             const hasLink = !!item.link;
             return (
               <div

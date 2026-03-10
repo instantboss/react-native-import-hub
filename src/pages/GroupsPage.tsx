@@ -33,7 +33,7 @@ export default function GroupsPage() {
         {groups.map((group) => (
           <button
             key={group.id}
-            onClick={() => handlePress(group.link || group.url || '')}
+            onClick={() => handlePress(group.link || '')}
             className="flex flex-col items-center p-4 rounded-xl border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow"
           >
             <div className="w-20 h-20 rounded-full bg-[var(--color-brand-pink-light)] flex items-center justify-center mb-3">
@@ -42,7 +42,7 @@ export default function GroupsPage() {
             <p className="text-sm font-semibold text-[var(--color-text-primary)] text-center leading-tight mb-2">
               {group.name || group.title || 'Group'}
             </p>
-            {(group.link || group.url) && (
+            {group.link && (
               <div className="flex items-center gap-1">
                 <ExternalLink size={14} className="text-[var(--color-brand-pink)]" />
                 <span className="text-xs text-[var(--color-text-secondary)]">Open Group</span>
