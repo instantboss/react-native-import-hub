@@ -4,6 +4,7 @@ import { Copy, Check } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { fetchDailyContent31, fetchUserImagesForDate, resolveImageUrl, type DailyContent, type UserGeneratedImage } from '@/lib/api';
 import PageHeader from '@/components/PageHeader';
+import { Lightbox } from './TemplatesPage';
 
 function formatDateDisplay(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
@@ -47,6 +48,7 @@ export default function DailyContentDetailPage() {
   const [userImages, setUserImages] = useState<UserGeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedImage, setSelectedImage] = useState<{ url: string; index: number } | null>(null);
 
   useEffect(() => {
     if (!date) return;
@@ -142,13 +144,18 @@ export default function DailyContentDetailPage() {
           </div>
           <div className="flex gap-3 overflow-x-auto px-4 pb-2">
             {images.map((url, i) => (
-              <img
+              <button
                 key={i}
-                src={url}
-                alt={`Image ${i + 1}`}
-                className="w-[60%] sm:w-[calc((100%-24px)/3)] shrink-0 rounded-xl object-cover aspect-square"
-                loading="lazy"
-              />
+                onClick={() => setSelectedImage({ url, index: i + 1 })}
+                className="w-[60%] sm:w-[calc((100%-24px)/3)] shrink-0 rounded-xl overflow-hidden aspect-square"
+              >
+                <img
+                  src={url}
+                  alt={`Image ${i + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -227,6 +234,15 @@ export default function DailyContentDetailPage() {
           </div>
           <CopyButton text={content.extra_tasks} label="Copy extra tasks" />
         </div>
+      )}
+
+      {selectedImage && (
+        <Lightbox
+          src={selectedImage.url}
+          onClose={() => setSelectedImage(null)}
+          title={`${date ? formatDateDisplay(date) : 'Daily'} - Image ${selectedImage.index}`}
+          downloadLabel={`daily-image-${date}-${selectedImage.index}.jpg`}
+        />
       )}
     </div>
   );
