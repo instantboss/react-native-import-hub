@@ -4,9 +4,12 @@ import { fetchNews, resolveImageUrl, type ContentItem } from '@/lib/api';
 import PageHeader from '@/components/PageHeader';
 import { LoadingSpinner } from './TemplatesPage';
 
-function formatFriendlyDate(timestamp: number | undefined): string {
+function formatFriendlyDate(timestamp: number | string | undefined): string {
   if (!timestamp) return '';
-  const date = new Date(timestamp * 1000);
+  // Xano returns ms timestamps or ISO strings — detect and handle both
+  const date = typeof timestamp === 'string'
+    ? new Date(timestamp)
+    : new Date(timestamp > 1e12 ? timestamp : timestamp * 1000);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));

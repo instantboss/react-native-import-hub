@@ -28,7 +28,7 @@ const fieldLabels: Record<keyof EditableFields, string> = {
 };
 
 export default function ProfilePage() {
-  const { user, logout, refreshProfile } = useUser();
+  const { user, logout, refreshProfile, isPaid, isAdmin } = useUser();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -94,11 +94,11 @@ export default function ProfilePage() {
 
   // Use logo (business image) like RN app, fallback to profile_image
   const profileImgUrl = resolveImageUrl(user?.logo) || resolveImageUrl(user?.profile_image);
-  const subscriptionLabel = user?.trial_member || user?.free_member
-    ? 'Trial / Free'
-    : user?.base_member
-      ? 'Active Member'
-      : 'Inactive';
+  const subscriptionLabel = isAdmin
+    ? 'Super Admin'
+    : isPaid
+      ? 'Premium Member'
+      : 'Trial Member';
 
   if (!user) {
     return (
@@ -130,9 +130,11 @@ export default function ProfilePage() {
         </h2>
         <p className="text-sm text-[var(--color-text-muted)]">{user.email}</p>
         <span className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-          user.base_member && !user.trial_member && !user.free_member
-            ? 'bg-green-50 text-green-700'
-            : 'bg-amber-50 text-amber-700'
+          isAdmin
+            ? 'bg-purple-50 text-purple-700'
+            : isPaid
+              ? 'bg-green-50 text-green-700'
+              : 'bg-amber-50 text-amber-700'
         }`}>
           {subscriptionLabel}
         </span>

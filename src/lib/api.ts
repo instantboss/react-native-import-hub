@@ -168,13 +168,19 @@ export interface Mentor {
 
 export interface Lesson {
   id: number;
-  title: string;
+  name: string;
+  title?: string;
   description?: string;
+  image?: UserProfileImage | null;
   thumbnail?: UserProfileImage | null;
+  youtube_url?: string;
   video_url?: string;
   video?: { url: string };
   duration?: string;
   sort_order?: number;
+  mentor_id?: number;
+  trial?: boolean;
+  _mentor?: { id: number; name: string; image?: { url: string } };
 }
 
 export interface ShoppingListItem {
@@ -521,7 +527,7 @@ export async function fetchGroups(onUpdate?: (d: ContentItem[]) => void): Promis
 // ==========================================
 export async function fetchProductNames(onUpdate?: (d: ContentItem[]) => void): Promise<ContentItem[]> {
   return cachedFetch('product_names', async () => {
-    const response = await api.get('/product_names');
+    const response = await api.get('/product_name');
     const data = response.data;
     return Array.isArray(data) ? data : data?.items || [];
   }, CACHE_DURATION.MEDIUM, onUpdate);

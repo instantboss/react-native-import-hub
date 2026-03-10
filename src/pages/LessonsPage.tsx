@@ -24,7 +24,7 @@ export default function LessonsPage() {
     const q = searchQuery.toLowerCase();
     return lessons.filter(
       (l) =>
-        (l.title || '').toLowerCase().includes(q) ||
+        (l.name || l.title || '').toLowerCase().includes(q) ||
         (l.description || '').toLowerCase().includes(q)
     );
   }, [lessons, searchQuery]);
@@ -61,7 +61,7 @@ export default function LessonsPage() {
       ) : (
         <div className="space-y-3">
           {filteredLessons.map((lesson) => {
-            const thumb = resolveImageUrl(lesson.thumbnail);
+            const thumb = resolveImageUrl(lesson.image) || resolveImageUrl(lesson.thumbnail);
             return (
               <button
                 key={lesson.id}
@@ -78,7 +78,7 @@ export default function LessonsPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{lesson.title}</p>
+                  <p className="font-medium truncate">{lesson.name || lesson.title}</p>
                   {lesson.description && (
                     <p className="text-sm text-[var(--color-text-muted)] line-clamp-1 mt-0.5">{lesson.description}</p>
                   )}
