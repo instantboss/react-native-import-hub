@@ -366,7 +366,7 @@ export const fetchPresets = (limit = 50, offset = 0, onUpdate?: (d: Preset[]) =>
   fetchPaginatedContent<Preset>('/presets', 'presets', limit, offset, onUpdate);
 
 export const fetchExtraPdfs = (perPage = 50, page = 0, onUpdate?: (d: ExtraPdf[]) => void) =>
-  fetchPaginatedContent<ExtraPdf>('/extra_pdfs', 'extra_pdfs', perPage, page, onUpdate);
+  fetchPaginatedContent<ExtraPdf>('/pdfs', 'extra_pdfs', perPage, page, onUpdate);
 
 export const fetchExtraGraphics = (onUpdate?: (d: ExtraGraphic[]) => void) =>
   fetchPaginatedContent<ExtraGraphic>('/extra_graphics', 'extra_graphics', 100, 0, onUpdate);
