@@ -33,7 +33,7 @@ export default function GroupsPage() {
         {groups.map((group) => (
           <button
             key={group.id}
-            onClick={() => handlePress(group.link || group.url || '')}
+            onClick={() => handlePress(group.link || '')}
             className="flex flex-col items-center p-4 rounded-xl border border-[var(--color-border-light)] bg-white hover:shadow-md transition-shadow"
           >
             <div className="w-20 h-20 rounded-full bg-[var(--color-brand-pink-light)] flex items-center justify-center mb-3">
