@@ -14,7 +14,7 @@ interface UserContextValue {
   isAdmin: boolean;
   refreshProfile: () => Promise<void>;
   refreshUnreadCount: () => Promise<void>;
-  login: (token: string, user: { id: number; email: string; first_name: string; last_name: string }) => void;
+  login: (token: string, user: { id: number; email: string; first_name: string; last_name: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -51,7 +51,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback((token: string, userData: { id: number; email: string; first_name: string; last_name: string }) => {
+  const login = useCallback(async (token: string, userData: { id: number; email: string; first_name: string; last_name: string }) => {
     saveAuthToken(token);
     saveUserData({
       id: userData.id,
@@ -59,8 +59,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       firstName: userData.first_name,
       lastName: userData.last_name,
     });
-    // Fetch full profile after login
-    refreshProfile();
+    // Fetch full profile before navigating so ProtectedRoute sees the user
+    await refreshProfile();
     refreshUnreadCount();
   }, [refreshProfile, refreshUnreadCount]);
 

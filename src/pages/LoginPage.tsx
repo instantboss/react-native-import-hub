@@ -53,7 +53,7 @@ export default function LoginPage() {
       // Match RN app: just save token and refresh profile
       const token = res.authToken || (res as any).auth_token || (res as any).token;
       if (!token) throw new Error('No auth token received');
-      login(token, res.user || { id: 0, email: email.trim().toLowerCase(), first_name: '', last_name: '' });
+      await login(token, res.user || { id: 0, email: email.trim().toLowerCase(), first_name: '', last_name: '' });
       navigate('/', { replace: true });
     } catch (err: any) {
       console.error('Magic login error:', err.response?.status, err.response?.data, err.message);
