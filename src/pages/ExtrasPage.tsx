@@ -96,7 +96,7 @@ export default function ExtrasPage() {
 
   // Videos: play inline or open video URL
   const handleVideoPress = (item: ExtraVideo) => {
-    const videoUrl = item.video?.url || item.link || '';
+    const videoUrl = (item as any).video_url || (item as any).url || item.video?.url || item.link || '';
     if (videoUrl) setVideoModal(videoUrl);
   };
 
