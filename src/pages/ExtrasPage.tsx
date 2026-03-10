@@ -255,8 +255,18 @@ export default function ExtrasPage() {
           <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
             <X size={24} className="text-white" />
           </button>
-          <div className="w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col items-center gap-4 w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
             <video src={videoModal} controls autoPlay className="w-full rounded-lg" />
+            <a
+              href={videoModal}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-brand-pink)] text-white font-semibold hover:opacity-90 transition"
+            >
+              <Download size={18} />
+              Download Video
+            </a>
           </div>
         </div>
       )}
