@@ -27,7 +27,7 @@ export default function ExtrasVideosPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((item) => {
           const thumb = resolveImageUrl(item.image) || item.image_url || item.thumbnail || '';
-          const videoUrl = item.video?.url || item.link || '';
+          const videoUrl = (item as any).video_url || (item as any).url || item.video?.url || item.link || '';
           const isPlaying = playingId === item.id;
 
           return (
